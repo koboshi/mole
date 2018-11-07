@@ -72,7 +72,7 @@ func (databaseTx *DatabaseTx) Update(data map[string]interface{}, tblName string
 	}
 	result, err := databaseTx.tx.Exec(updateSql, values...)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	var affectedRows int64
 	affectedRows, _ = result.RowsAffected()
@@ -86,7 +86,7 @@ func (databaseTx *DatabaseTx) Delete(tblName string, whereStr string, whereArgs 
 	deleteSql := fmt.Sprintf("DELETE FROM %s WHERE %s", tblName, whereStr)
 	result, err := databaseTx.tx.Exec(deleteSql, whereArgs...)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	var affectedRows int64
 	affectedRows, _ = result.RowsAffected()
@@ -107,7 +107,7 @@ func (databaseTx *DatabaseTx) internalInsert( data map[string]interface{}, tblNa
 	insertSql := fmt.Sprintf("%s INTO %s SET %s", insertType, tblName, setStr)
 	result, err := databaseTx.tx.Exec(insertSql, values...)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	var lastInsertId int64
 	lastInsertId, _ = result.LastInsertId()

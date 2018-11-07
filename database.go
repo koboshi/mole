@@ -114,7 +114,7 @@ func (database *Database) Update(data map[string]interface{}, tblName string, wh
 	}
 	result, err := database.db.Exec(updateSql, values...)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	var affectedRows int64
 	affectedRows, _ = result.RowsAffected()
@@ -128,7 +128,7 @@ func (database *Database) Delete(tblName string, whereStr string, whereArgs ...i
 	deleteSql := fmt.Sprintf("DELETE FROM %s WHERE %s", tblName, whereStr)
 	result, err := database.db.Exec(deleteSql, whereArgs...)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	var affectedRows int64
 	affectedRows, _ = result.RowsAffected()
@@ -149,7 +149,7 @@ func (database *Database) internalInsert (data map[string]interface{}, tblName s
 	insertSql := fmt.Sprintf("%s INTO %s SET %s", insertType, tblName, setStr)
 	result, err := database.db.Exec(insertSql, values...)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	var lastInsertId int64
 	lastInsertId, _ = result.LastInsertId()
