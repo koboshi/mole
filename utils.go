@@ -6,8 +6,8 @@ import (
 )
 
 func buildInsertSql (data map[string]interface{}, tblName string, insertType string) (patternSql string, patternValues []interface{}) {
-	fields := make([]string, 0, 10)
-	values := make([]interface{}, 0, 10)
+	fields := make([]string, 0)
+	values := make([]interface{}, 0)
 	var subField string
 	for field, value := range data {
 		subField = fmt.Sprintf("`%s` = ?", field)
@@ -21,8 +21,8 @@ func buildInsertSql (data map[string]interface{}, tblName string, insertType str
 }
 
 func buildUpdateSql (data map[string]interface{}, tblName string, whereStr string, whereArgs ...interface{}) (patternSql string, patternValues []interface{}) {
-	fields := make([]string, 0, 10)
-	values := make([]interface{}, 0, 10)
+	fields := make([]string, 0)
+	values := make([]interface{}, 0)
 	for field, value := range data {
 		var subField = fmt.Sprintf("`%s` = ?", field)
 		fields = append(fields, subField)
