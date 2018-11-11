@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"github.com/go-sql-driver/mysql"
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -100,18 +99,7 @@ func (database *Database) Replace(data map[string]interface{}, tblName string) (
 // UPDATE的WHERE语句以字符串形式传入，支持传入where语句参数，占位符为 ? ,会自动转义
 // 返回sql.Result以及error
 func (database *Database) Update(data map[string]interface{}, tblName string, whereStr string, whereArgs ...interface{}) (int64, error) {
-	fields := make([]string, 0, 10)
-	values := make([]interface{}, 0, 10)
-	for field, value := range data {
-		var subField = fmt.Sprintf("`%s` = ?", field)
-		fields = append(fields, subField)
-		values = append(values, value)
-	}
-	setStr := strings.Join(fields, ", ")
-	updateSql := fmt.Sprintf("UPDATE %s SET %s WHERE %s", tblName, setStr, whereStr)
-	if len(whereArgs) > 0 {
-		values = append(values, whereArgs...)
-	}
+	updateSql, values := buildUpdateSql(data, tblName, whereStr, whereArgs)
 	result, err := database.db.Exec(updateSql, values...)
 	if err != nil {
 		return 0, err
@@ -137,16 +125,7 @@ func (database *Database) Delete(tblName string, whereStr string, whereArgs ...i
 
 // 执行数据写入的内部方法,支持insert/insert ignore/replace
 func (database *Database) internalInsert (data map[string]interface{}, tblName string, insertType string) (int64, error) {
-	fields := make([]string, 0, 10)
-	values := make([]interface{}, 0, 10)
-	var subField string
-	for field, value := range data {
-		subField = fmt.Sprintf("`%s` = ?", field)
-		fields = append(fields, subField)
-		values = append(values, value)
-	}
-	setStr := strings.Join(fields, ", ")
-	insertSql := fmt.Sprintf("%s INTO %s SET %s", insertType, tblName, setStr)
+	insertSql, values := buildInsertSql(data, tblName, insertType)
 	result, err := database.db.Exec(insertSql, values...)
 	if err != nil {
 		return 0, err

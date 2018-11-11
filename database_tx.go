@@ -3,7 +3,6 @@ package mole
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 )
 
 // 数据库事务
@@ -58,18 +57,7 @@ func (databaseTx *DatabaseTx) Replace(data map[string]interface{}, tblName strin
 // UPDATE的WHERE语句以字符串形式传入，支持传入where语句参数，占位符为 ? ,会自动转义
 // 返回sql.Result以及error
 func (databaseTx *DatabaseTx) Update(data map[string]interface{}, tblName string, whereStr string, whereArgs ...interface{}) (int64, error) {
-	fields := make([]string, 0, 10)
-	values := make([]interface{}, 0, 10)
-	for field, value := range data {
-		var subField = fmt.Sprintf("`%s` = ?", field)
-		fields = append(fields, subField)
-		values = append(values, value)
-	}
-	setStr := strings.Join(fields, ", ")
-	updateSql := fmt.Sprintf("UPDATE %s SET %s WHERE %s", tblName, setStr, whereStr)
-	if len(whereArgs) > 0 {
-		values = append(values, whereArgs...)
-	}
+	updateSql, values := buildUpdateSql(data, tblName, whereStr, whereArgs)
 	result, err := databaseTx.tx.Exec(updateSql, values...)
 	if err != nil {
 		return 0, err
@@ -95,16 +83,7 @@ func (databaseTx *DatabaseTx) Delete(tblName string, whereStr string, whereArgs 
 
 // 执行数据写入的内部方法,支持insert/insert ignore/replace
 func (databaseTx *DatabaseTx) internalInsert( data map[string]interface{}, tblName string, insertType string) (int64, error) {
-	fields := make([]string, 0, 10)
-	values := make([]interface{}, 0, 10)
-	var subField string
-	for field, value := range data {
-		subField = fmt.Sprintf("`%s` = ?", field)
-		fields = append(fields, subField)
-		values = append(values, value)
-	}
-	setStr := strings.Join(fields, ", ")
-	insertSql := fmt.Sprintf("%s INTO %s SET %s", insertType, tblName, setStr)
+	insertSql, values := buildInsertSql(data, tblName, insertType)
 	result, err := databaseTx.tx.Exec(insertSql, values...)
 	if err != nil {
 		return 0, err
