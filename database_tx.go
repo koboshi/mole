@@ -57,7 +57,7 @@ func (databaseTx *DatabaseTx) Replace(data map[string]interface{}, tblName strin
 // UPDATE的WHERE语句以字符串形式传入，支持传入where语句参数，占位符为 ? ,会自动转义
 // 返回sql.Result以及error
 func (databaseTx *DatabaseTx) Update(data map[string]interface{}, tblName string, whereStr string, whereArgs ...interface{}) (int64, error) {
-	updateSql, values := buildUpdateSql(data, tblName, whereStr, whereArgs)
+	updateSql, values := buildUpdateSql(data, tblName, whereStr, whereArgs...)
 	result, err := databaseTx.tx.Exec(updateSql, values...)
 	if err != nil {
 		return 0, err
