@@ -1,4 +1,4 @@
-package mole
+package database
 
 import (
 	"database/sql"
