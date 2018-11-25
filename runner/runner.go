@@ -1,4 +1,4 @@
-package mole
+package runner
 
 import (
 	"os"
