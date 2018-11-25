@@ -2,18 +2,18 @@ package work
 
 import "sync"
 
-type Worker interface {
-	Task()
-}
+//type Worker interface {
+//	Task()
+//}
 
 type Pool struct {
-	work chan Worker
+	work chan func()
 	wg sync.WaitGroup
 }
 
 func New(MaxGoroutines int) *Pool {
 	p := Pool{
-		work: make(chan Worker),
+		work: make(chan func()),
 	}
 
 	p.wg.Add(MaxGoroutines)
@@ -21,7 +21,7 @@ func New(MaxGoroutines int) *Pool {
 		go func() {
 			defer p.wg.Done()
 			for w := range p.work {
-				w.Task()
+				w()
 			}
 		}()
 	}
@@ -29,7 +29,7 @@ func New(MaxGoroutines int) *Pool {
 	return &p
 }
 
-func (p *Pool) Run(w Worker) {
+func (p *Pool) Run(w func()) {
 	p.work <- w
 }
 
