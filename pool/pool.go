@@ -18,10 +18,11 @@ type Pool struct {
 }
 
 var ErrPoolClosed = errors.New("pool has been closed")
+var ErrPoolSize = errors.New("size value too small")
 
 func New(fn func()(io.Closer, error), size uint) (*Pool, error) {
 	if size <= 0 {
-		return nil, errors.New("size value too small")
+		return nil, ErrPoolSize
 	}
 
 	return &Pool{
@@ -74,9 +75,13 @@ func (p *Pool) Close() {
 
 	close(p.resources)
 
+	var wg sync.WaitGroup
+	wg.Add(len(p.resources))
 	for r:= range p.resources {
 		go func() {
+			defer wg.Done()
 			r.Close()
 		}()
 	}
+	wg.Wait()
 }
