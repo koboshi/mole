@@ -11,6 +11,18 @@ type Database struct {
 	db *sql.DB
 }
 
+func New(host string, username string, password string, schema string, charset string) (*Database, error) {
+	db := new(Database)
+	customParams := make(map[string]string)
+	customParams["readTimeout"] = "30m"
+	customParams["writeTimeout"] = "30m"
+	err := db.Connect(host, username, password, schema, charset, customParams)
+	if err == nil {
+		return nil, err
+	}
+	return db, nil
+}
+
 func (database *Database) Connect (host string, username string, password string, schema string, charset string, customParams map[string]string) error {
 	//DSN: [username[:password]@][protocol[(address)]]/schema[?param1=value1&...&paramN=valueN]
 	//初始化DSN参数

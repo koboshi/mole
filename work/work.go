@@ -1,6 +1,9 @@
 package work
 
-import "sync"
+import (
+	"sync"
+	"errors"
+)
 
 //type Worker interface {
 //	Task()
@@ -11,13 +14,18 @@ type Pool struct {
 	wg sync.WaitGroup
 }
 
-func New(MaxGoroutines int) *Pool {
+var ErrGoroutinesNum = errors.New("goroutines num too small")
+
+func New(maxGoroutines int) (*Pool, error) {
+	if maxGoroutines < 1 {
+		return nil, ErrGoroutinesNum
+	}
 	p := Pool{
 		work: make(chan func()),
 	}
 
-	p.wg.Add(MaxGoroutines)
-	for i:= 0; i < MaxGoroutines; i++ {
+	p.wg.Add(maxGoroutines)
+	for i:= 0; i < maxGoroutines; i++ {
 		go func() {
 			defer p.wg.Done()
 			for w := range p.work {
@@ -26,7 +34,7 @@ func New(MaxGoroutines int) *Pool {
 		}()
 	}
 
-	return &p
+	return &p, nil
 }
 
 func (p *Pool) Run(w func()) {
